@@ -1,0 +1,16 @@
+{
+    "tasks": "My tasks",
+    "done": "Doned",
+    "new": "New",
+    "importance": "Importence",
+    "doneTill": "To do by",
+    "delete": "Delete",
+    "save": "SAVE",
+    "none": "None",
+    "low": "Low",
+    "high": "High",
+    "obscure": "Write a task",
+    "confirm": "Are you serious want to delete changes?",
+    "yes": "YES",
+    "no": "NO"
+}
