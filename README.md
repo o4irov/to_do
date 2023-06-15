@@ -12,7 +12,7 @@
 
 ## 📥 .apk файл для скачивания на Android
 
-Вы можете скачать приложение по ссылке: [install To Do](https://github.com/o4irov/SHMR_ToDo/releases/download/1.0/app-release.apk)
+Вы можете скачать приложение по ссылке: [install To Do](https://github.com/o4irov/to_do/releases/download/1.0/app-release.apk)
 
 ## 📝 Библиотеки
 
