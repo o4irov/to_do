@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:to_do/constants/constants.dart';
-import 'package:to_do/presentation/add_change.dart';
-import 'package:to_do/presentation/todo_list.dart';
+import 'package:to_do/presentation/add_change_task/add_change.dart';
+import 'package:to_do/presentation/home_screen/todo_list.dart';
 import 'package:to_do/utils/localizations.dart';
 
-class ToDo extends StatefulWidget {
-  const ToDo({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<ToDo> createState() => _ToDoState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _ToDoState extends State<ToDo> {
+class _HomeScreenState extends State<HomeScreen> {
   bool _isVisible = true;
   int count = 0;
   void changeCount(bool? increase) {
@@ -62,8 +62,8 @@ class _ToDoState extends State<ToDo> {
                             onPressed: _toggleVisibility,
                             icon: Icon(
                               _isVisible
-                                  ? Icons.visibility_off_rounded
-                                  : Icons.visibility_rounded,
+                                  ? Icons.visibility_rounded
+                                  : Icons.visibility_off_rounded,
                               color: AppConstants.blue(context),
                             ),
                           )

@@ -1,10 +1,39 @@
+import 'dart:async';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:to_do/constants/constants.dart';
-import 'package:to_do/presentation/home_screen.dart';
+import 'package:to_do/presentation/home_screen/home_screen.dart';
 import 'package:to_do/utils/localizations.dart';
+import 'package:to_do/utils/logger.dart';
+
+import 'constants/theme.dart';
 
 void main() {
+  final uncaughtExceptionsController = StreamController<void>.broadcast();
+  PlatformDispatcher.instance.onError = (error, stackTrace) {
+    logger.e(
+      'Uncaught exception',
+      error,
+      stackTrace,
+    );
+
+    uncaughtExceptionsController.addError(error, stackTrace);
+
+    return true;
+  };
+
+  FlutterError.onError = (details) {
+    logger.e(
+      'Uncaught exception',
+      details.exception,
+      details.stack,
+    );
+
+    if (!details.silent) {
+      uncaughtExceptionsController.addError(details.exception, details.stack);
+    }
+  };
   runApp(const MainApp());
 }
 
@@ -19,58 +48,8 @@ class MainApp extends StatelessWidget {
         valueListenable: vl,
         builder: (context, value, child) {
           return MaterialApp(
-            theme: ThemeData(
-              useMaterial3: true,
-              colorScheme: ColorScheme.light(
-                primary: AppConstants.primary(context),
-                secondary: AppConstants.secondary(context),
-                tertiary: AppConstants.tertiary(context),
-                background: AppConstants.backPrimary(context),
-              ),
-              scaffoldBackgroundColor: AppConstants.backPrimary(context),
-              textTheme: TextTheme(
-                titleLarge: TextStyle(
-                  fontFamily: 'Roboto-Medium',
-                  fontSize: 32,
-                  fontWeight: FontWeight.w500,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? AppConstants.white(context)
-                      : AppConstants.primary(context),
-                ),
-                titleMedium: TextStyle(
-                  fontFamily: 'Roboto-Medium',
-                  fontSize: 20,
-                  fontWeight: FontWeight.w500,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? AppConstants.white(context)
-                      : AppConstants.primary(context),
-                ),
-                labelLarge: TextStyle(
-                  fontFamily: 'Roboto-Medium',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? AppConstants.white(context)
-                      : AppConstants.primary(context),
-                ),
-                bodyMedium: TextStyle(
-                  fontFamily: 'Roboto-Regular',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w400,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? AppConstants.white(context)
-                      : AppConstants.primary(context),
-                ),
-                bodySmall: TextStyle(
-                  fontFamily: 'Roboto-Regular',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? AppConstants.white(context)
-                      : AppConstants.primary(context),
-                ),
-              ),
-            ),
+            theme: ThemeConfig.lightTheme,
+            darkTheme: ThemeConfig.darkTheme,
             themeMode: ThemeMode.system,
             localizationsDelegates: const [
               AppLocalizationsDelegate(),
@@ -82,7 +61,7 @@ class MainApp extends StatelessWidget {
               Locale('ru', ''),
             ],
             locale: const Locale('ru' ''),
-            home: const ToDo(),
+            home: const HomeScreen(),
           );
         });
   }

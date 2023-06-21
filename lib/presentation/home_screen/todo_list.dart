@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:to_do/constants/constants.dart';
-import 'package:to_do/models/task.dart';
-import 'package:to_do/presentation/task.dart';
+import 'package:to_do/domain/models/global.dart';
+import 'package:to_do/domain/models/task.dart';
+import 'package:to_do/presentation/common/task.dart';
 import 'package:to_do/utils/localizations.dart';
 
-import 'add_change.dart';
+import '../../utils/logger.dart';
+import '../add_change_task/add_change.dart';
 
 class ToDoList extends StatefulWidget {
   final bool isVisible;
@@ -26,17 +27,20 @@ class _ToDoListState extends State<ToDoList> {
     Task(
         id: 2,
         title: 'Купить что-то, где-то, зачем-то, но зачем не очень понятно',
-        importance: 'high'),
+        importance: Priority.high),
     Task(
         id: 3,
         title:
             'Купить что-то, где-то, зачем-то, но зачем не очень понятно, но точно чтобы показать как обр…',
-        importance: 'low'),
+        importance: Priority.low),
   ];
+  TasksId tasksId = TasksId();
 
-  var logger = Logger(
-    printer: PrettyPrinter(),
-  );
+  @override
+  void initState() {
+    tasksId.count = tasks.length;
+    super.initState();
+  }
 
   void _callCountChanged(bool? increase) {
     widget.changeCount(increase);
@@ -45,12 +49,12 @@ class _ToDoListState extends State<ToDoList> {
   void deleteTask(int id) {
     setState(() {
       tasks.removeWhere((element) => element.id == id);
-      logger.d('Id deleted task: $id');
     });
+    logger.d('Id deleted task: $id');
   }
 
-  void onChanged(Task task, bool? value) {
-    _callCountChanged(value);
+  void onChanged(Task task, bool? increase) {
+    _callCountChanged(increase);
     setState(() {
       try {
         int idx =
@@ -102,15 +106,15 @@ class _ToDoListState extends State<ToDoList> {
           return TaskTile(
             task: tasks[index],
             deleteTask: deleteTask,
-            onChanged: (task, value) => onChanged(task, value),
+            onChanged: (task, increase) => onChanged(task, increase),
           );
         }
         // Инчае показываем только те, которые ещё нужно выполнить
-        if (tasks[index].status == 'in doing') {
+        if (!tasks[index].isCompleted) {
           return TaskTile(
             task: tasks[index],
             deleteTask: deleteTask,
-            onChanged: (task, value) => onChanged(task, value),
+            onChanged: (task, increase) => onChanged(task, increase),
           );
         }
         return Container();

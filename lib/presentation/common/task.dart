@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:to_do/constants/constants.dart';
-import 'package:to_do/presentation/add_change.dart';
+import 'package:to_do/presentation/add_change_task/add_change.dart';
 
-import '../models/task.dart';
+import '../../domain/models/task.dart';
 
 class TaskTile extends StatelessWidget {
   final Task task;
@@ -21,7 +21,7 @@ class TaskTile extends StatelessWidget {
         Task(
           id: task.id,
           title: task.title,
-          status: 'done',
+          isCompleted: true,
           deadline: task.deadline,
           importance: task.importance,
         ),
@@ -32,7 +32,7 @@ class TaskTile extends StatelessWidget {
         Task(
           id: task.id,
           title: task.title,
-          status: 'in doing',
+          isCompleted: false,
           deadline: task.deadline,
           importance: task.importance,
         ),
@@ -51,11 +51,13 @@ class TaskTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dismissible(
       key: ValueKey<int>(task.id),
-      background: done(context),
-      secondaryBackground: delete(context),
+      background: const Done(),
+      secondaryBackground: const Delete(),
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.startToEnd) {
-          change(true);
+          if (!task.isCompleted) {
+            change(true);
+          }
           return false;
         }
         return true;
@@ -68,6 +70,7 @@ class TaskTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10),
         color: AppConstants.backSecondary(context),
+        
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,14 +81,14 @@ class TaskTile extends StatelessWidget {
                 SizedBox(
                   height: 24,
                   child: Checkbox(
-                    value: task.status == 'done',
+                    value: task.isCompleted,
                     onChanged: (value) => change(value ?? true),
                     fillColor: MaterialStateProperty.resolveWith<Color>(
                       (Set<MaterialState> states) {
                         if (states.contains(MaterialState.selected)) {
                           return AppConstants.green(context);
                         }
-                        return task.importance == 'high'
+                        return task.importance == Priority.high
                             ? AppConstants.red(context)
                             : AppConstants.separator(context);
                       },
@@ -94,30 +97,10 @@ class TaskTile extends StatelessWidget {
                     checkColor: AppConstants.backPrimary(context),
                   ),
                 ),
-                task.importance == 'high' && task.status != 'done'
-                    ? Text(
-                        '!! ',
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(
-                                color: AppConstants.red(context),
-                                height: 1.2,
-                                fontWeight: FontWeight.w900),
-                      )
-                    : task.importance == 'low' && task.status != 'done'
-                        ? Text(
-                            '↓ ',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                    color: AppConstants.gray(context),
-                                    fontSize: 24,
-                                    height: .9,
-                                    fontWeight: FontWeight.w900),
-                          )
-                        : Container(),
+                Importance(
+                  importance: task.importance,
+                  isCompleted: task.isCompleted,
+                ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -132,10 +115,10 @@ class TaskTile extends StatelessWidget {
                                 .textTheme
                                 .bodyMedium
                                 ?.copyWith(
-                                  color: task.status == 'done'
+                                  color: task.isCompleted
                                       ? AppConstants.tertiary(context)
                                       : AppConstants.primary(context),
-                                  decoration: task.status == 'done'
+                                  decoration: task.isCompleted
                                       ? TextDecoration.lineThrough
                                       : TextDecoration.none,
                                   decorationColor:
@@ -190,8 +173,13 @@ class TaskTile extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget done(BuildContext context) {
+class Done extends StatelessWidget {
+  const Done({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       color: AppConstants.green(context),
       child: Align(
@@ -206,8 +194,13 @@ class TaskTile extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget delete(BuildContext context) {
+class Delete extends StatelessWidget {
+  const Delete({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       color: AppConstants.red(context),
       child: Align(
@@ -221,5 +214,35 @@ class TaskTile extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class Importance extends StatelessWidget {
+  final Priority importance;
+  final bool isCompleted;
+  const Importance(
+      {super.key, required this.importance, required this.isCompleted});
+
+  @override
+  Widget build(BuildContext context) {
+    if (importance == Priority.high && !isCompleted) {
+      return Text(
+        '!! ',
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: AppConstants.red(context),
+            height: 1.2,
+            fontWeight: FontWeight.w900),
+      );
+    } else if (importance == Priority.low && !isCompleted) {
+      return Text(
+        '↓ ',
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: AppConstants.gray(context),
+            fontSize: 24,
+            height: .9,
+            fontWeight: FontWeight.w900),
+      );
+    }
+    return Container();
   }
 }
