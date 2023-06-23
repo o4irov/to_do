@@ -9,10 +9,12 @@ environment:
 isar_version: 3.1.0 
 
 dependencies:
+  device_info: ^2.0.3
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  http: ^0.13.6
   intl: ^0.17.0
   isar: ^3.1.0+1
   isar_flutter_libs: ^3.1.0+1

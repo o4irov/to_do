@@ -89,7 +89,7 @@ TaskIsar _taskIsarDeserialize(
   final object = TaskIsar(
     importance:
         _TaskIsarimportanceValueEnumMap[reader.readByteOrNull(offsets[1])] ??
-            Priority.none,
+            Priority.basic,
   );
   object.deadline = reader.readDateTimeOrNull(offsets[0]);
   object.id = id;
@@ -109,7 +109,7 @@ P _taskIsarDeserializeProp<P>(
       return (reader.readDateTimeOrNull(offset)) as P;
     case 1:
       return (_TaskIsarimportanceValueEnumMap[reader.readByteOrNull(offset)] ??
-          Priority.none) as P;
+          Priority.basic) as P;
     case 2:
       return (reader.readBoolOrNull(offset)) as P;
     case 3:
@@ -120,14 +120,14 @@ P _taskIsarDeserializeProp<P>(
 }
 
 const _TaskIsarimportanceEnumValueMap = {
-  'none': 0,
+  'basic': 0,
   'low': 1,
-  'high': 2,
+  'important': 2,
 };
 const _TaskIsarimportanceValueEnumMap = {
-  0: Priority.none,
+  0: Priority.basic,
   1: Priority.low,
-  2: Priority.high,
+  2: Priority.important,
 };
 
 Id _taskIsarGetId(TaskIsar object) {

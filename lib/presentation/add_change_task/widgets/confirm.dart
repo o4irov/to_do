@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:to_do/domain/managers/persistence_manager.dart';
 
 import '../../../constants/constants.dart';
 import '../../../domain/models/task.dart';
 import '../../../utils/localizations.dart';
-import '../../home_screen/home_screen.dart';
 
 class Confirm extends StatelessWidget {
   final Task? task;
   const Confirm({super.key, required this.task});
+
+  void removeTask(Task? task) async {
+    PersistenceManager persistenceManager = PersistenceManager();
+    await persistenceManager.removeTask(task: task!);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +47,7 @@ class Confirm extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: () {
-                    HomeScreen.removeOf(context, task: task!);
+                    removeTask(task);
                     Navigator.pop(context);
                     Navigator.pop(context);
                   },

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:to_do/constants/constants.dart';
-import 'package:to_do/presentation/home_screen/home_screen.dart';
 import 'package:to_do/utils/localizations.dart';
 import '../../domain/global.dart';
 import '../../domain/models/task.dart';
@@ -19,7 +18,7 @@ class AddTask extends StatefulWidget {
 
 class _AddTaskState extends State<AddTask> {
   final TextEditingController _titleController = TextEditingController();
-  Priority _importance = Priority.none;
+  Priority _importance = Priority.basic;
   late bool _deadlineExist;
   late DateTime _selectedDate;
   bool _isAdding = false;
@@ -29,7 +28,7 @@ class _AddTaskState extends State<AddTask> {
     _deadlineExist = widget.task?.deadline != null;
     _selectedDate = widget.task?.deadline ?? DateTime.now();
     _titleController.text = widget.task?.title ?? '';
-    _importance = widget.task?.importance ?? Priority.none;
+    _importance = widget.task?.importance ?? Priority.basic;
     if (widget.task == null) {
       setState(() {
         _isAdding = true;
@@ -40,15 +39,15 @@ class _AddTaskState extends State<AddTask> {
 
   void _changeSelected(String imp) {
     setState(() {
-      if (imp == 'high') {
-        _importance = Priority.high;
+      if (imp == 'important') {
+        _importance = Priority.important;
         return;
       }
       if (imp == 'low') {
         _importance = Priority.low;
         return;
       }
-      _importance = Priority.none;
+      _importance = Priority.basic;
     });
   }
 
@@ -120,11 +119,6 @@ class _AddTaskState extends State<AddTask> {
                   deadline: _deadlineExist ? _selectedDate : null,
                   isCompleted: widget.task?.isCompleted ?? false,
                 );
-                if (_isAdding) {
-                  HomeScreen.addOf(context, task: task);
-                } else {
-                  // HomeScreen.changeOf(context, task: task);
-                }
                 Navigator.pop(context, task);
               },
               child: Text(

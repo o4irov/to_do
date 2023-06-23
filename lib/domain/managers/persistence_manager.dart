@@ -33,9 +33,36 @@ class PersistenceManager {
         .toList();
   }
 
+  Future<void> setTasks(List<Task> tasks) async {
+    final isar = await _isarGetter;
+    isar.writeTxn(() async {
+      await isar.taskIsars.clear();
+      await isar.taskIsars.putAll(tasks
+          .map((task) => TaskIsar()
+            ..title = task.title
+            ..importance = task.importance
+            ..deadline = task.deadline
+            ..isCompleted = task.isCompleted)
+          .toList());
+    });
+  }
+
   Future<void> addTask({required Task task}) async {
     final isar = await _isarGetter;
     final newTask = TaskIsar()
+      ..title = task.title
+      ..importance = task.importance
+      ..deadline = task.deadline
+      ..isCompleted = task.isCompleted;
+    isar.writeTxn(() async {
+      await isar.taskIsars.put(newTask);
+    });
+  }
+
+  Future<void> changeTask({required Task task}) async {
+    final isar = await _isarGetter;
+    final newTask = TaskIsar()
+      ..id = task.id
       ..title = task.title
       ..importance = task.importance
       ..deadline = task.deadline
@@ -51,17 +78,4 @@ class PersistenceManager {
       await isar.taskIsars.delete(task.id);
     });
   }
-
-  // Future<void> updateTask({required Task task}) async {
-  //   final isar = await _isarGetter;
-  //   var changableTask = await isar.taskIsars.get(task.id);
-  //   changableTask = TaskIsar()
-  //     ..title = task.title
-  //     ..importance = task.importance
-  //     ..deadline = task.deadline
-  //     ..isCompleted = task.isCompleted;
-  //   isar.writeTxn(() async {
-  //     isar.taskIsars.put(changableTask!);
-  //   });
-  // }
 }

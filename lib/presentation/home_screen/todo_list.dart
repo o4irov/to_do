@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:to_do/constants/constants.dart';
-import 'package:to_do/domain/global.dart';
 import 'package:to_do/domain/models/task.dart';
 import 'package:to_do/presentation/common/task.dart';
 import 'package:to_do/utils/localizations.dart';
@@ -20,11 +19,9 @@ class ToDoList extends StatefulWidget {
 }
 
 class _ToDoListState extends State<ToDoList> {
-  TasksId tasksId = TasksId();
 
   @override
   void initState() {
-    tasksId.count = HomeScreen.listOf(context)!.length;
     super.initState();
   }
 

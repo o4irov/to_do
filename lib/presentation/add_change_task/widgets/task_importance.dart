@@ -18,7 +18,7 @@ class TaskImportance extends StatelessWidget {
         child: Text(
           title,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: imp == Priority.high
+                color: imp == Priority.important
                     ? AppConstants.red(context)
                     : AppConstants.primary(context),
               ),
@@ -39,21 +39,23 @@ class TaskImportance extends StatelessWidget {
           initialValue: importance.toString().split('.').last,
           itemBuilder: (context) {
             return [
-              item(AppLocalizations.of(context)?.translate('none') ?? '',
-                  Priority.none),
+              item(AppLocalizations.of(context)?.translate('basic') ?? '',
+                  Priority.basic),
               item(AppLocalizations.of(context)?.translate('low') ?? '',
                   Priority.low),
-              item(AppLocalizations.of(context)?.translate('high') ?? '',
-                  Priority.high),
+              item(AppLocalizations.of(context)?.translate('important') ?? '',
+                  Priority.important),
             ];
           },
-          onSelected: (value) => changeSelected(value),
+          onSelected: (value) {
+            changeSelected(value);
+          },
           icon: Text(
             (AppLocalizations.of(context)
                     ?.translate(importance.toString().split('.').last)) ??
                 '',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: importance == Priority.high
+                  color: importance == Priority.important
                       ? AppConstants.red(context)
                       : AppConstants.tertiary(context),
                 ),

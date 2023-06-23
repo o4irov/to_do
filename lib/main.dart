@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -8,8 +9,10 @@ import 'package:to_do/utils/localizations.dart';
 import 'package:to_do/utils/logger.dart';
 
 import 'constants/theme.dart';
+import 'domain/global.dart';
 
 void main() {
+  HttpOverrides.global = MyHttpOverrides();
   final uncaughtExceptionsController = StreamController<void>.broadcast();
   PlatformDispatcher.instance.onError = (error, stackTrace) {
     logger.e(
@@ -37,32 +40,26 @@ void main() {
   runApp(const MainApp());
 }
 
-var vl = ValueNotifier<ThemeMode>(ThemeMode.light);
-
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-        valueListenable: vl,
-        builder: (context, value, child) {
-          return MaterialApp(
-            theme: ThemeConfig.lightTheme,
-            darkTheme: ThemeConfig.darkTheme,
-            themeMode: ThemeMode.system,
-            localizationsDelegates: const [
-              AppLocalizationsDelegate(),
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-            ],
-            supportedLocales: const [
-              Locale('en', 'EN'),
-              Locale('ru', 'RU'),
-            ],
-            locale: const Locale('ru', 'EN'),
-            home: const HomeScreen(),
-          );
-        });
+    return MaterialApp(
+      theme: ThemeConfig.lightTheme,
+      darkTheme: ThemeConfig.darkTheme,
+      themeMode: ThemeMode.system,
+      localizationsDelegates: const [
+        AppLocalizationsDelegate(),
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en', 'EN'),
+        Locale('ru', 'RU'),
+      ],
+      locale: const Locale('ru', 'EN'),
+      home: const HomeScreen(),
+    );
   }
 }

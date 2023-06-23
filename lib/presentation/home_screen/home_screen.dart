@@ -5,6 +5,7 @@ import 'package:to_do/presentation/home_screen/todo_list.dart';
 import 'package:to_do/utils/logger.dart';
 
 import '../../constants/constants.dart';
+import '../../domain/managers/network_manager.dart';
 import '../../utils/localizations.dart';
 import '../add_change_task/add_change.dart';
 
@@ -38,29 +39,17 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Task> _tasks = <Task>[
-    Task(
-      id: 1,
-      title: 'Купить что-то',
-    ),
-    Task(
-        id: 2,
-        title: 'Купить что-то, где-то, зачем-то, но зачем не очень понятно',
-        importance: Priority.high),
-    Task(
-        id: 3,
-        title:
-            'Купить что-то, где-то, зачем-то, но зачем не очень понятно, но точно чтобы показать как обр…',
-        importance: Priority.low),
-  ];
+  List<Task> _tasks = <Task>[];
 
   final PersistenceManager _persistenceManager = PersistenceManager();
+  final NetworkManager _networkManager = NetworkManager();
 
   bool _isVisible = true;
   int count = 0;
 
   @override
   void initState() {
+    _networkManager.getTasks();
     _persistenceManager
         .getTasks()
         .then((value) => setState(() => _tasks = value));
@@ -68,32 +57,30 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void addTask(Task task) async {
-    // setState(() {
-    //   _tasks = List.of([..._tasks, task]);
-    // });
     await _persistenceManager.addTask(task: task);
-    _tasks = await _persistenceManager.getTasks();
-    setState(() {});
+    setState(() {
+      _tasks = [..._tasks, task];
+    });
+    await _networkManager.addTask(task);
   }
 
-  Future<void> removeTask(Task task) async {
-    // setState(() {
-    //   _tasks = List.of(_tasks.where((e) => e != task));
-    //   if (task.isCompleted) {
-    //     count--;
-    //   }
-    // });
+  void removeTask(Task task) async {
     await _persistenceManager.removeTask(task: task);
-    _tasks = await _persistenceManager.getTasks();
+    _tasks.remove(task);
     setState(() {});
+    if (task.isCompleted) {
+      increaseCount(false);
+    }
+    await _networkManager.removeTask(task.id);
     logger.d('Deleted task: ${task.id}');
   }
 
-  void changeTask(Task task) {
-    // setState(() {
-    //   _tasks[_tasks.indexOf(
-    //       _tasks.firstWhere((element) => element.id == task.id))] = task;
-    // });
+  void changeTask(Task task) async {
+    await _persistenceManager.changeTask(task: task);
+    _tasks[_tasks
+        .indexOf(_tasks.firstWhere((element) => element.id == task.id))] = task;
+    setState(() {});
+    await _networkManager.changeTask(task);
   }
 
   void increaseCount(bool isIncrease) {

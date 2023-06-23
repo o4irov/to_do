@@ -22,7 +22,7 @@ class TaskTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     void addTask(Task newTask) {
-      HomeScreen.addOf(context, task: newTask);
+      HomeScreen.changeOf(context, task: newTask);
     }
 
     return Dismissible(
@@ -91,7 +91,7 @@ class TaskTile extends StatelessWidget {
                         if (states.contains(MaterialState.selected)) {
                           return AppConstants.green(context);
                         }
-                        return task.importance == Priority.high
+                        return task.importance == Priority.important
                             ? AppConstants.red(context)
                             : AppConstants.separator(context);
                       },
@@ -229,7 +229,7 @@ class Importance extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (importance == Priority.high && !isCompleted) {
+    if (importance == Priority.important && !isCompleted) {
       return Text(
         '!! ',
         style: Theme.of(context).textTheme.titleMedium?.copyWith(

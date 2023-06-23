@@ -8,14 +8,14 @@ class Task {
   Task({
     required this.id,
     required this.title,
-    this.importance = Priority.none,
+    this.importance = Priority.basic,
     this.deadline,
     this.isCompleted = false,
   });
 }
 
 enum Priority {
-  none,
+  basic,
   low,
-  high,
+  important,
 }

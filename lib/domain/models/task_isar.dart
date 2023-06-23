@@ -14,6 +14,6 @@ class TaskIsar {
   DateTime? deadline;
 
   TaskIsar({
-    this.importance = Priority.none,
+    this.importance = Priority.basic,
   });
 }
