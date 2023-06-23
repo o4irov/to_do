@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:to_do/constants/constants.dart';
+import 'package:to_do/presentation/home_screen/home_screen.dart';
 import 'package:to_do/utils/localizations.dart';
-import '../../domain/models/global.dart';
+import '../../domain/global.dart';
 import '../../domain/models/task.dart';
-import '../../utils/logger.dart';
+import 'widgets/task_delete.dart';
+import 'widgets/task_importance.dart';
+import 'widgets/task_title.dart';
 
 class AddTask extends StatefulWidget {
   final Task? task;
-  final Function(int)? deleteTask;
-  const AddTask({super.key, this.task, this.deleteTask});
+  const AddTask({super.key, this.task});
 
   @override
   State<AddTask> createState() => _AddTaskState();
@@ -56,21 +58,12 @@ class _AddTaskState extends State<AddTask> {
     });
   }
 
-  Future<void> _confirmDelete() async {
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return Confirm(
-          deleteTask: widget.deleteTask!,
-          task: widget.task!,
-        );
-      },
-    );
-  }
-
   String formatDate(String inputDate) {
     final parsedDate = DateFormat('dd MM yyyy').parse(inputDate);
-    final formattedDate = DateFormat('dd MMMM yyyy').format(parsedDate);
+    final formattedDate = DateFormat(
+      'dd MMMM yyyy',
+      Localizations.localeOf(context).languageCode,
+    ).format(parsedDate);
     return formattedDate;
   }
 
@@ -127,7 +120,11 @@ class _AddTaskState extends State<AddTask> {
                   deadline: _deadlineExist ? _selectedDate : null,
                   isCompleted: widget.task?.isCompleted ?? false,
                 );
-                logger.d('Saved task: ${task.title}');
+                if (_isAdding) {
+                  HomeScreen.addOf(context, task: task);
+                } else {
+                  // HomeScreen.changeOf(context, task: task);
+                }
                 Navigator.pop(context, task);
               },
               child: Text(
@@ -148,9 +145,9 @@ class _AddTaskState extends State<AddTask> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Title(titleController: _titleController),
+                    TaskTitle(titleController: _titleController),
                     const Padding(padding: EdgeInsets.only(top: 10)),
-                    Importance(
+                    TaskImportance(
                       importance: _importance,
                       changeSelected: _changeSelected,
                     ),
@@ -171,8 +168,8 @@ class _AddTaskState extends State<AddTask> {
                 height: 1,
                 color: AppConstants.separator(context),
               ),
-              Delete(
-                confirmDelete: _confirmDelete,
+              TaskDelete(
+                task: widget.task,
                 isAdding: _isAdding,
               ),
             ],
@@ -221,205 +218,6 @@ class _AddTaskState extends State<AddTask> {
           inactiveTrackColor: AppConstants.overlay(context),
         ),
       ],
-    );
-  }
-}
-
-class Title extends StatelessWidget {
-  final TextEditingController titleController;
-  const Title({super.key, required this.titleController});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: AppConstants.backSecondary(context),
-        borderRadius: const BorderRadius.all(
-          Radius.circular(10),
-        ),
-      ),
-      child: TextField(
-        controller: titleController,
-        maxLines: 4,
-        decoration: InputDecoration(
-          hintText: AppLocalizations.of(context)?.translate('obscure'),
-          hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppConstants.tertiary(context),
-              ),
-          border: InputBorder.none,
-        ),
-        style: Theme.of(context).textTheme.bodyMedium,
-      ),
-    );
-  }
-}
-
-class Importance extends StatelessWidget {
-  final Priority importance;
-  final Function(String) changeSelected;
-  const Importance(
-      {super.key, required this.importance, required this.changeSelected});
-
-  @override
-  Widget build(BuildContext context) {
-    PopupMenuItem item(String title, Priority imp) {
-      return PopupMenuItem<String>(
-        value: imp.toString().split('.').last,
-        child: Text(
-          title,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: imp == Priority.high
-                    ? AppConstants.red(context)
-                    : AppConstants.primary(context),
-              ),
-        ),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          AppLocalizations.of(context)?.translate('importance') ?? '',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize: 18,
-              ),
-        ),
-        PopupMenuButton(
-          initialValue: importance.toString().split('.').last,
-          itemBuilder: (context) {
-            return [
-              item(AppLocalizations.of(context)?.translate('none') ?? '',
-                  Priority.none),
-              item(AppLocalizations.of(context)?.translate('low') ?? '',
-                  Priority.low),
-              item(AppLocalizations.of(context)?.translate('high') ?? '',
-                  Priority.high),
-            ];
-          },
-          onSelected: (value) => changeSelected(value),
-          icon: Text(
-            (AppLocalizations.of(context)
-                    ?.translate(importance.toString().split('.').last)) ??
-                '',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: importance == Priority.high
-                      ? AppConstants.red(context)
-                      : AppConstants.tertiary(context),
-                ),
-          ),
-          padding: const EdgeInsets.only(left: 0),
-          color: AppConstants.backElevated(context),
-        ),
-      ],
-    );
-  }
-}
-
-class Delete extends StatelessWidget {
-  final bool isAdding;
-  final Function() confirmDelete;
-  const Delete(
-      {super.key, required this.confirmDelete, required this.isAdding});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: isAdding
-                ? null
-                : () async {
-                    await confirmDelete();
-                  },
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.delete,
-                    color: isAdding
-                        ? const Color.fromRGBO(255, 59, 48, .6)
-                        : AppConstants.red(context),
-                    size: 25,
-                  ),
-                  const Padding(padding: EdgeInsets.only(right: 10)),
-                  Text(
-                    AppLocalizations.of(context)?.translate('delete') ?? '',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: isAdding
-                              ? const Color.fromRGBO(255, 59, 48, .6)
-                              : AppConstants.red(context),
-                          fontSize: 18,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-}
-
-class Confirm extends StatelessWidget {
-  final Function(int) deleteTask;
-  final Task task;
-  const Confirm({super.key, required this.deleteTask, required this.task});
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      backgroundColor: AppConstants.backSecondary(context),
-      content: Container(
-        height: 170,
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              AppLocalizations.of(context)?.translate('confirm') ?? '',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text(
-                    AppLocalizations.of(context)?.translate('no') ?? '',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppConstants.blue(context),
-                        ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    deleteTask(task.id);
-                    Navigator.pop(context);
-                    Navigator.pop(context);
-                  },
-                  child: Text(
-                    AppLocalizations.of(context)?.translate('yes') ?? '',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppConstants.red(context),
-                        ),
-                  ),
-                ),
-              ],
-            )
-          ],
-        ),
-      ),
     );
   }
 }

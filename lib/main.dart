@@ -57,10 +57,10 @@ class MainApp extends StatelessWidget {
               GlobalWidgetsLocalizations.delegate,
             ],
             supportedLocales: const [
-              Locale('en', ''),
-              Locale('ru', ''),
+              Locale('en', 'EN'),
+              Locale('ru', 'RU'),
             ],
-            locale: const Locale('ru' ''),
+            locale: const Locale('ru', 'EN'),
             home: const HomeScreen(),
           );
         });
