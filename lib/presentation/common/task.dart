@@ -2,44 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:to_do/constants/constants.dart';
 import 'package:to_do/presentation/add_change_task/add_change.dart';
+import 'package:to_do/presentation/home_screen/home_screen.dart';
 
 import '../../domain/models/task.dart';
 
 class TaskTile extends StatelessWidget {
   final Task task;
-  final Function(int) deleteTask;
-  final Function(Task, bool?) onChanged;
-  const TaskTile(
-      {super.key,
-      required this.task,
-      required this.deleteTask,
-      required this.onChanged});
-
-  void change(bool value) {
-    if (value) {
-      onChanged(
-        Task(
-          id: task.id,
-          title: task.title,
-          isCompleted: true,
-          deadline: task.deadline,
-          importance: task.importance,
-        ),
-        value,
-      );
-    } else {
-      onChanged(
-        Task(
-          id: task.id,
-          title: task.title,
-          isCompleted: false,
-          deadline: task.deadline,
-          importance: task.importance,
-        ),
-        value,
-      );
-    }
-  }
+  const TaskTile({
+    super.key,
+    required this.task,
+  });
 
   String formatDate(String inputDate) {
     final parsedDate = DateFormat('dd MM yyyy').parse(inputDate);
@@ -49,6 +21,10 @@ class TaskTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    void addTask(Task newTask) {
+      HomeScreen.changeOf(context, task: newTask);
+    }
+
     return Dismissible(
       key: ValueKey<int>(task.id),
       background: const Done(),
@@ -56,7 +32,20 @@ class TaskTile extends StatelessWidget {
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.startToEnd) {
           if (!task.isCompleted) {
-            change(true);
+            HomeScreen.changeOf(
+              context,
+              task: Task(
+                id: task.id,
+                title: task.title,
+                deadline: task.deadline,
+                importance: task.importance,
+                isCompleted: true,
+              ),
+            );
+            HomeScreen.increaseCountOf(
+              context,
+              isIncrease: true,
+            );
           }
           return false;
         }
@@ -64,13 +53,12 @@ class TaskTile extends StatelessWidget {
       },
       onDismissed: (direction) {
         if (direction == DismissDirection.endToStart) {
-          deleteTask(task.id);
+          HomeScreen.removeOf(context, task: task);
         }
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10),
         color: AppConstants.backSecondary(context),
-        
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -82,13 +70,28 @@ class TaskTile extends StatelessWidget {
                   height: 24,
                   child: Checkbox(
                     value: task.isCompleted,
-                    onChanged: (value) => change(value ?? true),
+                    onChanged: (value) {
+                      HomeScreen.changeOf(
+                        context,
+                        task: Task(
+                          id: task.id,
+                          title: task.title,
+                          deadline: task.deadline,
+                          importance: task.importance,
+                          isCompleted: value!,
+                        ),
+                      );
+                      HomeScreen.increaseCountOf(
+                        context,
+                        isIncrease: value,
+                      );
+                    },
                     fillColor: MaterialStateProperty.resolveWith<Color>(
                       (Set<MaterialState> states) {
                         if (states.contains(MaterialState.selected)) {
                           return AppConstants.green(context);
                         }
-                        return task.importance == Priority.high
+                        return task.importance == Priority.important
                             ? AppConstants.red(context)
                             : AppConstants.separator(context);
                       },
@@ -146,20 +149,21 @@ class TaskTile extends StatelessWidget {
               ],
             ),
             GestureDetector(
-              onTap: () async {
-                final newTask = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AddTask(
-                      task: task,
-                      deleteTask: deleteTask,
-                    ),
-                  ),
-                );
-                if (newTask != null) {
-                  onChanged(newTask, null);
-                }
-              },
+              onTap: !task.isCompleted
+                  ? () async {
+                      final newTask = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddTask(
+                            task: task,
+                          ),
+                        ),
+                      );
+                      if (newTask != null) {
+                        addTask(newTask);
+                      }
+                    }
+                  : null,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Icon(
@@ -225,7 +229,7 @@ class Importance extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (importance == Priority.high && !isCompleted) {
+    if (importance == Priority.important && !isCompleted) {
       return Text(
         '!! ',
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
