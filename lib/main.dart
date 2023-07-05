@@ -58,7 +58,7 @@ class MainApp extends StatelessWidget {
         Locale('en', 'EN'),
         Locale('ru', 'RU'),
       ],
-      locale: const Locale('ru', 'EN'),
+      locale: Locale(Platform.localeName),
       home: const HomeScreen(),
     );
   }
