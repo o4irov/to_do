@@ -4,12 +4,12 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:to_do/presentation/home_screen/home_screen.dart';
+import 'package:to_do/navigation/router_delegate.dart';
 import 'package:to_do/utils/localizations.dart';
 import 'package:to_do/utils/logger.dart';
 
 import 'constants/theme.dart';
-import 'domain/global.dart';
+import 'utils/global.dart';
 
 void main() {
   HttpOverrides.global = MyHttpOverrides();
@@ -45,7 +45,7 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       theme: ThemeConfig.lightTheme,
       darkTheme: ThemeConfig.darkTheme,
       themeMode: ThemeMode.system,
@@ -59,7 +59,7 @@ class MainApp extends StatelessWidget {
         Locale('ru', 'RU'),
       ],
       locale: Locale(Platform.localeName),
-      home: const HomeScreen(),
+      routerDelegate: MyRouterDelegate(),
     );
   }
 }

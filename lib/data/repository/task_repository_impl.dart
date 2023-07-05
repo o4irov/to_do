@@ -1,5 +1,4 @@
-// import 'dart:io';
-
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:to_do/data/local/persistence_manager.dart';
 import 'package:to_do/data/remote/network_manager.dart';
 import 'package:to_do/domain/models/task.dart';
@@ -25,7 +24,8 @@ class TaskRepositoryImpl extends TaskRepository {
             'TaskRepositoryImpl: getTasks() current revision: local: $localRev remote: $remoteRevision');
         if (remoteRevision > localRev) {
           persistenceManager.setTasks(data);
-          logger.i('TaskRepositoryImpl: getTasks() local data updated');
+          logger.i(
+              'TaskRepositoryImpl: getTasks() local data updated with revision: local: $localRev remote: $remoteRevision');
           return data;
         } else if (remoteRevision < localRev) {
           final localData = await persistenceManager.getTasks();
@@ -57,9 +57,13 @@ class TaskRepositoryImpl extends TaskRepository {
     final hasNetwork = await networkChecker();
     try {
       await persistenceManager.addTask(task: task);
+      logger.i(
+          'TaskRepositoryImpl: addTask(${task.title}) task added to local storage');
       if (hasNetwork) {
         final remoteRevision = await networkManager.getRevision();
         await networkManager.addTask(task, remoteRevision);
+        logger.i(
+            'TaskRepositoryImpl: addTask(${task.title}) task added to remote storage');
       }
     } on Exception catch (e) {
       logger.e('TaskRepositoryImpl: addTask(): ${e.toString()}');
@@ -67,16 +71,20 @@ class TaskRepositoryImpl extends TaskRepository {
   }
 
   @override
-  Future<void> removeTask(int id) async {
+  Future<void> removeTask(String id) async {
     final hasNetwork = await networkChecker();
     try {
       await persistenceManager.removeTask(id: id);
+      logger.i(
+          'TaskRepositoryImpl: removeTask($id) task removed from local storage');
       if (hasNetwork) {
         final remoteRevision = await networkManager.getRevision();
         await networkManager.removeTask(
           id,
           remoteRevision,
         );
+        logger.i(
+            'TaskRepositoryImpl: removeTask($id) task removed from remote storage');
       }
     } on Exception catch (e) {
       logger.e('TaskRepositoryImpl: removeTask(): ${e.toString()}');
@@ -88,6 +96,8 @@ class TaskRepositoryImpl extends TaskRepository {
     final hasNetwork = await networkChecker();
     try {
       await persistenceManager.changeTask(task: task);
+      logger.i(
+          'TaskRepositoryImpl: changeTask(${task.title}) task changed at local storage');
       if (hasNetwork) {
         final remoteRevision = await networkManager.getRevision();
         persistenceManager.updateRevision(remoteRevision);
@@ -95,6 +105,8 @@ class TaskRepositoryImpl extends TaskRepository {
           task,
           remoteRevision,
         );
+        logger.i(
+            'TaskRepositoryImpl: changeTask(${task.title}) task changed at remote storage');
       }
     } on Exception catch (e) {
       logger.e('TaskRepositoryImpl: changeTask(): ${e.toString()}');
@@ -102,13 +114,9 @@ class TaskRepositoryImpl extends TaskRepository {
   }
 
   Future<bool> networkChecker() async {
-    return true;
-    // try {
-    //   final result = await InternetAddress.lookup('https://yandex.com');
-    //   return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
-    // } on Exception catch (e) {
-    //   logger.e('networkChecker : no connection(${e.toString()})');
-    //   return false;
-    // }
+    final connectivityResult = await (Connectivity().checkConnectivity());
+    logger.i('networkCheker: Connection: $connectivityResult');
+    return connectivityResult == ConnectivityResult.mobile ||
+        connectivityResult == ConnectivityResult.wifi;
   }
 }

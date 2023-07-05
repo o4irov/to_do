@@ -1,7 +1,7 @@
 import '../../utils/device_id.dart';
 
 class Task {
-  int id;
+  String id;
   String title;
   bool isCompleted;
   Priority importance;
@@ -25,7 +25,7 @@ class Task {
       imp = Priority.important;
     }
     return Task(
-      id: int.parse(data['id']),
+      id: data['id'],
       title: data['text'],
       importance: imp,
       deadline: data['deadline'] == null
@@ -46,7 +46,7 @@ class Task {
       imp = 'low';
     }
     Map<String, dynamic> data = {
-      'id': '${task.id}',
+      'id': task.id,
       'text': task.title,
       'importance': imp,
       'deadline': task.deadline == null

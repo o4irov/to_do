@@ -75,15 +75,16 @@ class PersistenceManager {
       ..deadline = task.deadline
       ..isCompleted = task.isCompleted;
     isar.writeTxn(() async {
+      await isar.taskIsars.delete(TaskIsar().fastHash(task.id));
       await isar.taskIsars.put(newTask);
     });
     updateRevision(null);
   }
 
-  Future<void> removeTask({required int id}) async {
+  Future<void> removeTask({required String id}) async {
     final isar = await _isarGetter;
     isar.writeTxn(() async {
-      await isar.taskIsars.delete(id);
+      await isar.taskIsars.delete(TaskIsar().fastHash(id));
     });
     updateRevision(null);
   }

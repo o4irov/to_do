@@ -1,20 +1,23 @@
 name: to_do
 description: A new Flutter project.
-publish_to: 'none'
+publish_to: "none"
 version: 0.1.0
 
 environment:
-  sdk: '>=2.19.2 <3.0.0'
+  sdk: ">=2.19.2 <3.0.0"
 
-isar_version: 3.1.0 
+isar_version: 3.1.0
 
 dependencies:
+  connectivity_plus: ^4.0.1
   device_info: ^2.0.3
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
   http: ^1.1.0
+  integration_test:
+    sdk: flutter
   intl: ^0.18.0
   isar: ^3.1.0+1
   isar_flutter_libs: ^3.1.0+1

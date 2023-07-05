@@ -5,8 +5,8 @@ import 'package:to_do/domain/models/task.dart';
 import 'package:to_do/utils/logger.dart';
 
 class NetworkManager {
-  static const _baseUrl = 'https://beta.mrdekk.ru/todobackend';
-  static const _token = 'contestability';
+  static const _baseUrl = String.fromEnvironment('url');
+  static const _token = String.fromEnvironment('token');
 
   Map<String, String> getHeaders(int revision) {
     return {
@@ -104,7 +104,7 @@ class NetworkManager {
     }
   }
 
-  Future<int> removeTask(int taskId, int revision) async {
+  Future<int> removeTask(String taskId, int revision) async {
     final uri = Uri.parse('$_baseUrl/list/$taskId');
     final response = await http.delete(
       uri,

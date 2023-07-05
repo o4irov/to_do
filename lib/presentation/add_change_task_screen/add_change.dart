@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:to_do/constants/constants.dart';
 import 'package:to_do/utils/localizations.dart';
-import '../../domain/global.dart';
+import 'package:uuid/uuid.dart';
 import '../../domain/models/task.dart';
 import 'widgets/task_delete.dart';
 import 'widgets/task_importance.dart';
@@ -108,12 +108,8 @@ class _AddTaskState extends State<AddTask> {
           actions: [
             TextButton(
               onPressed: () {
-                TasksId tasksId = TasksId();
-                if (widget.task?.id == null) {
-                  tasksId.count++;
-                }
                 final task = Task(
-                  id: widget.task?.id ?? tasksId.count,
+                  id: widget.task?.id ?? const Uuid().v4(),
                   title: _titleController.text,
                   importance: _importance,
                   deadline: _deadlineExist ? _selectedDate : null,
