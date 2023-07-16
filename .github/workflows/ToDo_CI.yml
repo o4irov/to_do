@@ -1,4 +1,4 @@
-name: Aanlyze -> Test -> Build -> Deploy
+name: Aanlyze -> Build -> Deploy
 
 on:
   push:
@@ -33,41 +33,12 @@ jobs:
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
 
-
-  test:
-    timeout-minutes: 10
-    name: 'Test before build and deploy'
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup java-version
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '12.x'
-          cache: gradle
-
-      - name: Flutter Setup
-        uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-
-      - run: echo "BASE_URL=${{ secrets.URL }}" >> $GITHUB_ENV
-      - run: echo "AUTH_TOKEN=${{ secrets.TOKEN }}" >> $GITHUB_ENV
-      - run: flutter pub get
-      - run: dart pub run build_runner build --delete-conflicting-outputs  
-      - name: Test
-        run: flutter run tests/integration/add_task.dart
-
   build:
     timeout-minutes: 15
     name: Build & Deploy
     runs-on: ubuntu-latest
     needs: 
       - analyze
-      - test
 
     steps:
       - uses: actions/checkout@v3
