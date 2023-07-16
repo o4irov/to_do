@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:to_do/constants/constants.dart';
+import 'package:to_do/data/controllers/tasks_change_notifier_controller.dart';
 import 'package:to_do/domain/models/task.dart';
 import 'package:to_do/presentation/common/task.dart';
 import 'package:to_do/utils/localizations.dart';
 
-import '../add_change_task/add_change.dart';
-import 'home_screen.dart';
+import '../add_change_task_screen/add_change.dart';
 
 class ToDoList extends StatefulWidget {
-  final bool isVisible;
+  final TasksChangeNotifierController notifierController;
+  final void Function() addTask;
   const ToDoList({
     super.key,
-    required this.isVisible,
+    required this.notifierController,
+    required this.addTask,
   });
 
   @override
@@ -19,25 +21,27 @@ class ToDoList extends StatefulWidget {
 }
 
 class _ToDoListState extends State<ToDoList> {
+  late final TasksChangeNotifierController _notifierController;
 
   @override
   void initState() {
+    _notifierController = widget.notifierController;
     super.initState();
   }
 
   void addTask(Task newTask) {
-    HomeScreen.addOf(context, task: newTask);
+    _notifierController.addTask(newTask);
   }
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
       shrinkWrap: true,
-      itemCount: HomeScreen.listOf(context)!.length + 1,
+      itemCount: _notifierController.tasks.length + 1,
       physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
         //Создаём задачу
-        if (index == HomeScreen.listOf(context)!.length) {
+        if (index == _notifierController.tasks.length) {
           return TextButton(
             onPressed: () async {
               final newTask = await Navigator.push(
@@ -65,16 +69,26 @@ class _ToDoListState extends State<ToDoList> {
           );
         }
         //Если нужно показывать решённые задачи
-        if (widget.isVisible) {
-          return TaskTile(
-            task: HomeScreen.listOf(context)![index],
-          );
+        if (_notifierController.isVisible) {
+          return AnimatedBuilder(
+              animation: _notifierController,
+              builder: (context, child) {
+                return TaskTile(
+                  task: _notifierController.tasks[index],
+                  tasksChangeNotifierController: _notifierController,
+                );
+              });
         }
         // Инчае показываем только те, которые ещё нужно выполнить
-        if (!HomeScreen.listOf(context)![index].isCompleted) {
-          return TaskTile(
-            task: HomeScreen.listOf(context)![index],
-          );
+        if (!_notifierController.tasks[index].isCompleted) {
+          return AnimatedBuilder(
+              animation: _notifierController,
+              builder: (context, child) {
+                return TaskTile(
+                  task: _notifierController.tasks[index],
+                  tasksChangeNotifierController: _notifierController,
+                );
+              });
         }
         return Container();
       },

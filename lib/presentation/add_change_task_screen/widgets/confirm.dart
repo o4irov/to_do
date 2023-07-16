@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:to_do/domain/managers/persistence_manager.dart';
+import 'package:to_do/data/local/persistence_manager.dart';
 
 import '../../../constants/constants.dart';
 import '../../../domain/models/task.dart';
@@ -11,7 +11,7 @@ class Confirm extends StatelessWidget {
 
   void removeTask(Task? task) async {
     PersistenceManager persistenceManager = PersistenceManager();
-    await persistenceManager.removeTask(task: task!);
+    await persistenceManager.removeTask(id: task!.id);
   }
 
   @override

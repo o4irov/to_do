@@ -12,5 +12,6 @@
     "obscure": "Write a task",
     "confirm": "Are you serious want to delete task?",
     "yes": "YES",
-    "no": "NO"
+    "no": "NO",
+    "notFound": "Page not found"
 }

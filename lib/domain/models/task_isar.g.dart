@@ -22,19 +22,24 @@ const TaskIsarSchema = CollectionSchema(
       name: r'deadline',
       type: IsarType.dateTime,
     ),
-    r'importance': PropertySchema(
+    r'id': PropertySchema(
       id: 1,
+      name: r'id',
+      type: IsarType.string,
+    ),
+    r'importance': PropertySchema(
+      id: 2,
       name: r'importance',
       type: IsarType.byte,
       enumMap: _TaskIsarimportanceEnumValueMap,
     ),
     r'isCompleted': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'isCompleted',
       type: IsarType.bool,
     ),
     r'title': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'title',
       type: IsarType.string,
     )
@@ -43,7 +48,7 @@ const TaskIsarSchema = CollectionSchema(
   serialize: _taskIsarSerialize,
   deserialize: _taskIsarDeserialize,
   deserializeProp: _taskIsarDeserializeProp,
-  idName: r'id',
+  idName: r'isarId',
   indexes: {},
   links: {},
   embeddedSchemas: {},
@@ -59,6 +64,7 @@ int _taskIsarEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  bytesCount += 3 + object.id.length * 3;
   {
     final value = object.title;
     if (value != null) {
@@ -75,9 +81,10 @@ void _taskIsarSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeDateTime(offsets[0], object.deadline);
-  writer.writeByte(offsets[1], object.importance.index);
-  writer.writeBool(offsets[2], object.isCompleted);
-  writer.writeString(offsets[3], object.title);
+  writer.writeString(offsets[1], object.id);
+  writer.writeByte(offsets[2], object.importance.index);
+  writer.writeBool(offsets[3], object.isCompleted);
+  writer.writeString(offsets[4], object.title);
 }
 
 TaskIsar _taskIsarDeserialize(
@@ -88,13 +95,13 @@ TaskIsar _taskIsarDeserialize(
 ) {
   final object = TaskIsar(
     importance:
-        _TaskIsarimportanceValueEnumMap[reader.readByteOrNull(offsets[1])] ??
+        _TaskIsarimportanceValueEnumMap[reader.readByteOrNull(offsets[2])] ??
             Priority.basic,
   );
   object.deadline = reader.readDateTimeOrNull(offsets[0]);
-  object.id = id;
-  object.isCompleted = reader.readBoolOrNull(offsets[2]);
-  object.title = reader.readStringOrNull(offsets[3]);
+  object.id = reader.readString(offsets[1]);
+  object.isCompleted = reader.readBoolOrNull(offsets[3]);
+  object.title = reader.readStringOrNull(offsets[4]);
   return object;
 }
 
@@ -108,11 +115,13 @@ P _taskIsarDeserializeProp<P>(
     case 0:
       return (reader.readDateTimeOrNull(offset)) as P;
     case 1:
+      return (reader.readString(offset)) as P;
+    case 2:
       return (_TaskIsarimportanceValueEnumMap[reader.readByteOrNull(offset)] ??
           Priority.basic) as P;
-    case 2:
-      return (reader.readBoolOrNull(offset)) as P;
     case 3:
+      return (reader.readBoolOrNull(offset)) as P;
+    case 4:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -131,19 +140,17 @@ const _TaskIsarimportanceValueEnumMap = {
 };
 
 Id _taskIsarGetId(TaskIsar object) {
-  return object.id;
+  return object.isarId;
 }
 
 List<IsarLinkBase<dynamic>> _taskIsarGetLinks(TaskIsar object) {
   return [];
 }
 
-void _taskIsarAttach(IsarCollection<dynamic> col, Id id, TaskIsar object) {
-  object.id = id;
-}
+void _taskIsarAttach(IsarCollection<dynamic> col, Id id, TaskIsar object) {}
 
 extension TaskIsarQueryWhereSort on QueryBuilder<TaskIsar, TaskIsar, QWhere> {
-  QueryBuilder<TaskIsar, TaskIsar, QAfterWhere> anyId() {
+  QueryBuilder<TaskIsar, TaskIsar, QAfterWhere> anyIsarId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
     });
@@ -151,66 +158,68 @@ extension TaskIsarQueryWhereSort on QueryBuilder<TaskIsar, TaskIsar, QWhere> {
 }
 
 extension TaskIsarQueryWhere on QueryBuilder<TaskIsar, TaskIsar, QWhereClause> {
-  QueryBuilder<TaskIsar, TaskIsar, QAfterWhereClause> idEqualTo(Id id) {
+  QueryBuilder<TaskIsar, TaskIsar, QAfterWhereClause> isarIdEqualTo(Id isarId) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
-        lower: id,
-        upper: id,
+        lower: isarId,
+        upper: isarId,
       ));
     });
   }
 
-  QueryBuilder<TaskIsar, TaskIsar, QAfterWhereClause> idNotEqualTo(Id id) {
+  QueryBuilder<TaskIsar, TaskIsar, QAfterWhereClause> isarIdNotEqualTo(
+      Id isarId) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(
-              IdWhereClause.lessThan(upper: id, includeUpper: false),
+              IdWhereClause.lessThan(upper: isarId, includeUpper: false),
             )
             .addWhereClause(
-              IdWhereClause.greaterThan(lower: id, includeLower: false),
+              IdWhereClause.greaterThan(lower: isarId, includeLower: false),
             );
       } else {
         return query
             .addWhereClause(
-              IdWhereClause.greaterThan(lower: id, includeLower: false),
+              IdWhereClause.greaterThan(lower: isarId, includeLower: false),
             )
             .addWhereClause(
-              IdWhereClause.lessThan(upper: id, includeUpper: false),
+              IdWhereClause.lessThan(upper: isarId, includeUpper: false),
             );
       }
     });
   }
 
-  QueryBuilder<TaskIsar, TaskIsar, QAfterWhereClause> idGreaterThan(Id id,
+  QueryBuilder<TaskIsar, TaskIsar, QAfterWhereClause> isarIdGreaterThan(
+      Id isarId,
       {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
-        IdWhereClause.greaterThan(lower: id, includeLower: include),
+        IdWhereClause.greaterThan(lower: isarId, includeLower: include),
       );
     });
   }
 
-  QueryBuilder<TaskIsar, TaskIsar, QAfterWhereClause> idLessThan(Id id,
+  QueryBuilder<TaskIsar, TaskIsar, QAfterWhereClause> isarIdLessThan(Id isarId,
       {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
-        IdWhereClause.lessThan(upper: id, includeUpper: include),
+        IdWhereClause.lessThan(upper: isarId, includeUpper: include),
       );
     });
   }
 
-  QueryBuilder<TaskIsar, TaskIsar, QAfterWhereClause> idBetween(
-    Id lowerId,
-    Id upperId, {
+  QueryBuilder<TaskIsar, TaskIsar, QAfterWhereClause> isarIdBetween(
+    Id lowerIsarId,
+    Id upperIsarId, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
-        lower: lowerId,
+        lower: lowerIsarId,
         includeLower: includeLower,
-        upper: upperId,
+        upper: upperIsarId,
         includeUpper: includeUpper,
       ));
     });
@@ -288,46 +297,55 @@ extension TaskIsarQueryFilter
     });
   }
 
-  QueryBuilder<TaskIsar, TaskIsar, QAfterFilterCondition> idEqualTo(Id value) {
+  QueryBuilder<TaskIsar, TaskIsar, QAfterFilterCondition> idEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'id',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<TaskIsar, TaskIsar, QAfterFilterCondition> idGreaterThan(
-    Id value, {
+    String value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
         property: r'id',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<TaskIsar, TaskIsar, QAfterFilterCondition> idLessThan(
-    Id value, {
+    String value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
         property: r'id',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<TaskIsar, TaskIsar, QAfterFilterCondition> idBetween(
-    Id lower,
-    Id upper, {
+    String lower,
+    String upper, {
     bool includeLower = true,
     bool includeUpper = true,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
@@ -336,6 +354,75 @@ extension TaskIsarQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskIsar, TaskIsar, QAfterFilterCondition> idStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'id',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskIsar, TaskIsar, QAfterFilterCondition> idEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'id',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskIsar, TaskIsar, QAfterFilterCondition> idContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'id',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskIsar, TaskIsar, QAfterFilterCondition> idMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'id',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskIsar, TaskIsar, QAfterFilterCondition> idIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'id',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<TaskIsar, TaskIsar, QAfterFilterCondition> idIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'id',
+        value: '',
       ));
     });
   }
@@ -416,6 +503,59 @@ extension TaskIsarQueryFilter
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'isCompleted',
         value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskIsar, TaskIsar, QAfterFilterCondition> isarIdEqualTo(
+      Id value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isarId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskIsar, TaskIsar, QAfterFilterCondition> isarIdGreaterThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'isarId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskIsar, TaskIsar, QAfterFilterCondition> isarIdLessThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'isarId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskIsar, TaskIsar, QAfterFilterCondition> isarIdBetween(
+    Id lower,
+    Id upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'isarId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -586,6 +726,18 @@ extension TaskIsarQuerySortBy on QueryBuilder<TaskIsar, TaskIsar, QSortBy> {
     });
   }
 
+  QueryBuilder<TaskIsar, TaskIsar, QAfterSortBy> sortById() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TaskIsar, TaskIsar, QAfterSortBy> sortByIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+
   QueryBuilder<TaskIsar, TaskIsar, QAfterSortBy> sortByImportance() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'importance', Sort.asc);
@@ -673,6 +825,18 @@ extension TaskIsarQuerySortThenBy
     });
   }
 
+  QueryBuilder<TaskIsar, TaskIsar, QAfterSortBy> thenByIsarId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isarId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TaskIsar, TaskIsar, QAfterSortBy> thenByIsarIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isarId', Sort.desc);
+    });
+  }
+
   QueryBuilder<TaskIsar, TaskIsar, QAfterSortBy> thenByTitle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.asc);
@@ -691,6 +855,13 @@ extension TaskIsarQueryWhereDistinct
   QueryBuilder<TaskIsar, TaskIsar, QDistinct> distinctByDeadline() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'deadline');
+    });
+  }
+
+  QueryBuilder<TaskIsar, TaskIsar, QDistinct> distinctById(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'id', caseSensitive: caseSensitive);
     });
   }
 
@@ -716,15 +887,21 @@ extension TaskIsarQueryWhereDistinct
 
 extension TaskIsarQueryProperty
     on QueryBuilder<TaskIsar, TaskIsar, QQueryProperty> {
-  QueryBuilder<TaskIsar, int, QQueryOperations> idProperty() {
+  QueryBuilder<TaskIsar, int, QQueryOperations> isarIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'id');
+      return query.addPropertyName(r'isarId');
     });
   }
 
   QueryBuilder<TaskIsar, DateTime?, QQueryOperations> deadlineProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'deadline');
+    });
+  }
+
+  QueryBuilder<TaskIsar, String, QQueryOperations> idProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'id');
     });
   }
 
