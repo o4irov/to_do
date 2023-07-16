@@ -2,18 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:to_do/constants/constants.dart';
 import 'package:to_do/data/controllers/tasks_change_notifier_controller.dart';
-import 'package:to_do/presentation/add_change_task_screen/add_change.dart';
+import 'package:to_do/presentation/common/widgets/animated_task_title.dart';
+import 'package:to_do/utils/firebase.dart';
 
 import '../../domain/models/task.dart';
 
 class TaskTile extends StatelessWidget {
   final TasksChangeNotifierController tasksChangeNotifierController;
   final Task task;
-  const TaskTile({
+  final void Function(Task, TasksChangeNotifierController) changeTaskScreen;
+  TaskTile({
     super.key,
     required this.task,
     required this.tasksChangeNotifierController,
+    required this.changeTaskScreen,
   });
+
+  final conf = Fire.configRepository;
 
   String formatDate(String inputDate) {
     final parsedDate = DateFormat('dd MM yyyy').parse(inputDate);
@@ -23,6 +28,14 @@ class TaskTile extends StatelessWidget {
 
   void changeTask(Task newTask) {
     tasksChangeNotifierController.changeTask(newTask);
+  }
+
+  Color importanceColor() {
+    if (conf.useDefaultColor) {
+      return const Color.fromRGBO(255, 59, 48, 1);
+    } else {
+      return const Color.fromARGB(255, 120, 60, 216);
+    }
   }
 
   @override
@@ -89,7 +102,7 @@ class TaskTile extends StatelessWidget {
                                 return AppConstants.green(context);
                               }
                               return task.importance == Priority.important
-                                  ? AppConstants.red(context)
+                                  ? importanceColor()
                                   : AppConstants.separator(context);
                             },
                           ),
@@ -104,29 +117,9 @@ class TaskTile extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width - 135,
-                                child: Text(
-                                  task.title,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        color: task.isCompleted
-                                            ? AppConstants.tertiary(context)
-                                            : AppConstants.primary(context),
-                                        decoration: task.isCompleted
-                                            ? TextDecoration.lineThrough
-                                            : TextDecoration.none,
-                                        decorationColor:
-                                            AppConstants.tertiary(context),
-                                      ),
-                                ),
-                              ),
-                            ],
+                          AnimatedTaskTitle(
+                            title: task.title,
+                            isCompleted: task.isCompleted,
                           ),
                           task.deadline != null
                               ? Text(
@@ -148,17 +141,10 @@ class TaskTile extends StatelessWidget {
                   GestureDetector(
                     onTap: !task.isCompleted
                         ? () async {
-                            final newTask = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => AddTask(
-                                  task: task,
-                                ),
-                              ),
+                            changeTaskScreen(
+                              task,
+                              tasksChangeNotifierController,
                             );
-                            if (newTask != null) {
-                              changeTask(newTask);
-                            }
                           }
                         : null,
                     child: Container(
@@ -222,29 +208,46 @@ class Delete extends StatelessWidget {
 class Importance extends StatelessWidget {
   final Priority importance;
   final bool isCompleted;
-  const Importance(
-      {super.key, required this.importance, required this.isCompleted});
+  Importance({super.key, required this.importance, required this.isCompleted});
+
+  final conf = Fire.configRepository;
+
+  final duration = const Duration(milliseconds: 300);
+
+  Color importanceColor() {
+    if (conf.useDefaultColor) {
+      return const Color.fromRGBO(255, 59, 48, 1);
+    } else {
+      return const Color.fromARGB(255, 120, 60, 216);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (importance == Priority.important && !isCompleted) {
-      return Text(
-        '!! ',
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: AppConstants.red(context),
-            height: 1.2,
-            fontWeight: FontWeight.w900),
-      );
-    } else if (importance == Priority.low && !isCompleted) {
-      return Text(
-        '↓ ',
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: AppConstants.gray(context),
-            fontSize: 24,
-            height: .9,
-            fontWeight: FontWeight.w900),
-      );
-    }
-    return Container();
+    return AnimatedCrossFade(
+      firstChild: importance == Priority.important
+          ? Text(
+              '!! ',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: importanceColor(),
+                    height: 1.2,
+                    fontWeight: FontWeight.w900,
+                  ),
+            )
+          : importance == Priority.low
+              ? Text(
+                  '↓ ',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: AppConstants.gray(context),
+                      fontSize: 24,
+                      height: .9,
+                      fontWeight: FontWeight.w900),
+                )
+              : Container(),
+      secondChild: Container(),
+      crossFadeState:
+          isCompleted ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+      duration: duration,
+    );
   }
 }

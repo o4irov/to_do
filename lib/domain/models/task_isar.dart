@@ -1,12 +1,11 @@
 import 'package:isar/isar.dart';
 import 'package:to_do/domain/models/task.dart';
-import 'package:uuid/uuid.dart';
 
 part 'task_isar.g.dart';
 
 @Collection()
 class TaskIsar {
-  String id = const Uuid().v4();
+  String id;
 
   Id get isarId => fastHash(id);
 
@@ -17,6 +16,7 @@ class TaskIsar {
   DateTime? deadline;
 
   TaskIsar({
+    required this.id,
     this.importance = Priority.basic,
   });
 

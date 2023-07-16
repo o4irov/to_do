@@ -5,13 +5,15 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:to_do/navigation/router_delegate.dart';
+import 'package:to_do/utils/firebase.dart';
 import 'package:to_do/utils/localizations.dart';
 import 'package:to_do/utils/logger.dart';
 
 import 'constants/theme.dart';
 import 'utils/global.dart';
 
-void main() {
+void main() async {
+  await Fire.init();
   HttpOverrides.global = MyHttpOverrides();
   final uncaughtExceptionsController = StreamController<void>.broadcast();
   PlatformDispatcher.instance.onError = (error, stackTrace) {

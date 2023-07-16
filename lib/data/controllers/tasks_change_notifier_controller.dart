@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:to_do/domain/models/task.dart';
+import 'package:to_do/utils/firebase.dart';
 
 import '../../domain/repository/task_repository.dart';
 
@@ -30,6 +31,13 @@ class TasksChangeNotifierController extends ChangeNotifier {
     tasks.add(task);
     notifyListeners();
     await _taskRepository.addTask(task);
+    Fire.analytics.logEvent(
+      name: 'AddTask',
+      parameters: {
+        'taskId': task.id,
+        'taskTitle': task.title,
+      },
+    );
     notifyListeners();
   }
 
@@ -40,6 +48,13 @@ class TasksChangeNotifierController extends ChangeNotifier {
     }
     notifyListeners();
     await _taskRepository.removeTask(task.id);
+    Fire.analytics.logEvent(
+      name: 'RemoveTask',
+      parameters: {
+        'taskId': task.id,
+        'taskTitle': task.title,
+      },
+    );
     notifyListeners();
   }
 
@@ -48,6 +63,13 @@ class TasksChangeNotifierController extends ChangeNotifier {
         task;
     notifyListeners();
     await _taskRepository.changeTask(task);
+    Fire.analytics.logEvent(
+      name: 'ChangeTask',
+      parameters: {
+        'taskId': task.id,
+        'taskTitle': task.title,
+      },
+    );
     notifyListeners();
   }
 

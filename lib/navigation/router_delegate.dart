@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:to_do/data/controllers/tasks_change_notifier_controller.dart';
 import 'package:to_do/navigation/navigation_state.dart';
 import 'package:to_do/presentation/add_change_task_screen/add_change.dart';
 import 'package:to_do/presentation/home_screen/home_screen.dart';
+import 'package:to_do/utils/firebase.dart';
 
-import '../presentation/common/uncnown.dart';
+import '../domain/models/task.dart';
 
 class MyRouterDelegate extends RouterDelegate<NavigationState>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<NavigationState> {
@@ -12,35 +14,37 @@ class MyRouterDelegate extends RouterDelegate<NavigationState>
 
   MyRouterDelegate() : navigatorKey = GlobalKey<NavigatorState>();
 
-  NavigationState? state;
+  NavigationState state = const NavigationState.main();
 
   @override
   Widget build(BuildContext context) {
     return Navigator(
       key: navigatorKey,
       pages: [
-        MaterialPage(
-          child: HomeScreen(
-            addTask: _showAddTaskScreen,
+        if (state.main == true) //
+          HomeScreen(
+            addTask: addTask,
+            changeTask: changeTask,
           ),
-        ),
-        if (state?.isAdding == true)
-          const MaterialPage(
-            child: AddTask(),
+        if (state.edit == true)
+          AddTask(
+            task: state.task,
+            tasksChangeNotifierController: state.tasksChangeNotifierController!,
+            pop: pop,
           ),
-        if (state?.isUnknown == true)
-          const MaterialPage(
-            child: UnknownScreen(),
-          ),
-      ],
+      ].map((e) => MaterialPage(child: e)).toList(),
       onPopPage: (route, result) {
         if (!route.didPop(result)) {
           return false;
         }
+        state = const NavigationState.main();
 
-        state = NavigationState.root();
+        Fire.analytics.logEvent(
+          name: 'returning_to_HomeScreen',
+        );
 
         notifyListeners();
+
         return true;
       },
     );
@@ -52,8 +56,31 @@ class MyRouterDelegate extends RouterDelegate<NavigationState>
     notifyListeners();
   }
 
-  void _showAddTaskScreen() {
-    state = NavigationState.adding();
+  void addTask(TasksChangeNotifierController tasksChangeNotifierController) {
+    state = NavigationState.edit(
+        tasksChangeNotifierController: tasksChangeNotifierController);
     notifyListeners();
+    Fire.analytics.logEvent(
+      name: 'AddTask_screen',
+    );
+  }
+
+  void changeTask(
+      Task task, TasksChangeNotifierController tasksChangeNotifierController) {
+    state = NavigationState.edit(
+        tasksChangeNotifierController: tasksChangeNotifierController,
+        task: task);
+    notifyListeners();
+    Fire.analytics.logEvent(
+      name: 'ChangeTask_screen:taskId:${task.id}',
+    );
+  }
+
+  void pop(BuildContext context) {
+    Navigator.pop(context);
+    notifyListeners();
+    Fire.analytics.logEvent(
+      name: 'returning_to_HomeScreen',
+    );
   }
 }
