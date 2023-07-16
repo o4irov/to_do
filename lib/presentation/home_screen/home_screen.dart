@@ -6,15 +6,17 @@ import 'package:to_do/presentation/home_screen/todo_list.dart';
 
 import '../../constants/constants.dart';
 import '../../data/remote/network_manager.dart';
+import '../../domain/models/task.dart';
 import '../../utils/localizations.dart';
-import '../add_change_task_screen/add_change.dart';
 
 @immutable
 class HomeScreen extends StatefulWidget {
-  final void Function() addTask;
+  final void Function(TasksChangeNotifierController) addTask;
+  final void Function(Task, TasksChangeNotifierController) changeTask;
   const HomeScreen({
     Key? key,
     required this.addTask,
+    required this.changeTask,
   }) : super(key: key);
 
   @override
@@ -114,9 +116,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             animation: tasksChangeNotifierController,
                             builder: (context, child) {
                               return ToDoList(
-                                addTask: widget.addTask,
                                 notifierController:
                                     tasksChangeNotifierController,
+                                changeTaskScreen: widget.changeTask,
+                                addTask: widget.addTask,
                               );
                             }),
                       ),
@@ -130,16 +133,9 @@ class _HomeScreenState extends State<HomeScreen> {
               animation: tasksChangeNotifierController,
               builder: (context, child) {
                 return FloatingActionButton(
-                  onPressed: () async {
-                    final newTask = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AddTask(),
-                      ),
-                    );
-                    if (newTask != null) {
-                      tasksChangeNotifierController.addTask(newTask);
-                    }
+                  onPressed: () {
+                    widget.addTask(tasksChangeNotifierController);
+                    // throw Exception('Crashlytics test');
                   },
                   backgroundColor: AppConstants.blue(context),
                   shape: const CircleBorder(),

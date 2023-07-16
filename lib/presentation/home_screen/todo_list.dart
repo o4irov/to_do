@@ -5,14 +5,14 @@ import 'package:to_do/domain/models/task.dart';
 import 'package:to_do/presentation/common/task.dart';
 import 'package:to_do/utils/localizations.dart';
 
-import '../add_change_task_screen/add_change.dart';
-
 class ToDoList extends StatefulWidget {
   final TasksChangeNotifierController notifierController;
-  final void Function() addTask;
+  final void Function(TasksChangeNotifierController) addTask;
+  final void Function(Task, TasksChangeNotifierController) changeTaskScreen;
   const ToDoList({
     super.key,
     required this.notifierController,
+    required this.changeTaskScreen,
     required this.addTask,
   });
 
@@ -44,15 +44,7 @@ class _ToDoListState extends State<ToDoList> {
         if (index == _notifierController.tasks.length) {
           return TextButton(
             onPressed: () async {
-              final newTask = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AddTask(),
-                ),
-              );
-              if (newTask != null) {
-                addTask(newTask);
-              }
+              widget.addTask(_notifierController);
             },
             child: Container(
               padding: const EdgeInsets.only(left: 53),
@@ -76,6 +68,7 @@ class _ToDoListState extends State<ToDoList> {
                 return TaskTile(
                   task: _notifierController.tasks[index],
                   tasksChangeNotifierController: _notifierController,
+                  changeTaskScreen: widget.changeTaskScreen,
                 );
               });
         }
@@ -87,6 +80,7 @@ class _ToDoListState extends State<ToDoList> {
                 return TaskTile(
                   task: _notifierController.tasks[index],
                   tasksChangeNotifierController: _notifierController,
+                  changeTaskScreen: widget.changeTaskScreen,
                 );
               });
         }

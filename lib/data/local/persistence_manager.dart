@@ -43,7 +43,7 @@ class PersistenceManager {
     isar.writeTxn(() async {
       await isar.taskIsars.clear();
       await isar.taskIsars.putAll(tasks
-          .map((task) => TaskIsar()
+          .map((task) => TaskIsar(id: task.id)
             ..title = task.title
             ..importance = task.importance
             ..deadline = task.deadline
@@ -55,7 +55,7 @@ class PersistenceManager {
 
   Future<void> addTask({required Task task}) async {
     final isar = await _isarGetter;
-    final newTask = TaskIsar()
+    final newTask = TaskIsar(id: task.id)
       ..title = task.title
       ..importance = task.importance
       ..deadline = task.deadline
@@ -68,14 +68,14 @@ class PersistenceManager {
 
   Future<void> changeTask({required Task task}) async {
     final isar = await _isarGetter;
-    final newTask = TaskIsar()
+    final newTask = TaskIsar(id: task.id)
       ..id = task.id
       ..title = task.title
       ..importance = task.importance
       ..deadline = task.deadline
       ..isCompleted = task.isCompleted;
     isar.writeTxn(() async {
-      await isar.taskIsars.delete(TaskIsar().fastHash(task.id));
+      await isar.taskIsars.delete(TaskIsar(id: task.id).fastHash(task.id));
       await isar.taskIsars.put(newTask);
     });
     updateRevision(null);
@@ -84,7 +84,7 @@ class PersistenceManager {
   Future<void> removeTask({required String id}) async {
     final isar = await _isarGetter;
     isar.writeTxn(() async {
-      await isar.taskIsars.delete(TaskIsar().fastHash(id));
+      await isar.taskIsars.delete(TaskIsar(id: id).fastHash(id));
     });
     updateRevision(null);
   }
