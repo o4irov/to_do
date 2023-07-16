@@ -1,0 +1,53 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: CI for application
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Note: This workflow uses the latest stable version of the Dart SDK.
+      # You can specify other versions if desired, see documentation here:
+      # https://github.com/dart-lang/setup-dart/blob/main/README.md
+      # - uses: dart-lang/setup-dart@v1
+      - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
+
+      - name: Install dependencies
+        run: dart pub get
+        
+      # Check format
+      - name: Analyze format of code
+        run: dart format .
+
+      # Check linter rules
+      - name: Analyze project source(linter)
+        run: dart analyze
+
+      # Start integration test
+      - name: Run tests(integration test)
+        run: flutter run tests/integration/add_task.dart
+        
+      # Run app in your emulator/device in debug mode
+      - name: Run app debug
+        run: flutter run lib/main_debug.dart --dart-define="url=<write base url>" --dart-define="token=<write your token>"
+        
+      # Run app in your emulator/device in production mode
+      - name: Run app production
+        run: flutter run lib/main_prod.dart --dart-define="url=<write base url>" --dart-define="token=<write your token>"
+        
+      # Build release version
+      - name: Build release
+        run: flutter build apk --release lib/main_prod.dart --dart-define="url=<write base url>" --dart-define="token=<write your token>"
+      
