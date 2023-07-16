@@ -61,9 +61,11 @@ class TaskRepositoryImpl extends TaskRepository {
           'TaskRepositoryImpl: addTask(${task.title}) task added to local storage');
       if (hasNetwork) {
         final remoteRevision = await networkManager.getRevision();
-        await networkManager.addTask(task, remoteRevision);
-        logger.i(
-            'TaskRepositoryImpl: addTask(${task.title}) task added to remote storage');
+        int rev = await networkManager.addTask(task, remoteRevision);
+        if (rev != -1) {
+          logger.i(
+              'TaskRepositoryImpl: addTask(${task.title}) task added to remote storage');
+        }
       }
     } on Exception catch (e) {
       logger.e('TaskRepositoryImpl: addTask(): ${e.toString()}');
@@ -79,12 +81,14 @@ class TaskRepositoryImpl extends TaskRepository {
           'TaskRepositoryImpl: removeTask($id) task removed from local storage');
       if (hasNetwork) {
         final remoteRevision = await networkManager.getRevision();
-        await networkManager.removeTask(
+        int rev = await networkManager.removeTask(
           id,
           remoteRevision,
         );
-        logger.i(
-            'TaskRepositoryImpl: removeTask($id) task removed from remote storage');
+        if (rev != -1) {
+          logger.i(
+              'TaskRepositoryImpl: removeTask($id) task removed from remote storage');
+        }
       }
     } on Exception catch (e) {
       logger.e('TaskRepositoryImpl: removeTask(): ${e.toString()}');
@@ -101,12 +105,14 @@ class TaskRepositoryImpl extends TaskRepository {
       if (hasNetwork) {
         final remoteRevision = await networkManager.getRevision();
         persistenceManager.updateRevision(remoteRevision);
-        await networkManager.changeTask(
+        int rev = await networkManager.changeTask(
           task,
           remoteRevision,
         );
-        logger.i(
-            'TaskRepositoryImpl: changeTask(${task.title}) task changed at remote storage');
+        if (rev != -1) {
+          logger.i(
+              'TaskRepositoryImpl: changeTask(${task.title}) task changed at remote storage');
+        }
       }
     } on Exception catch (e) {
       logger.e('TaskRepositoryImpl: changeTask(): ${e.toString()}');

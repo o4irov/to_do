@@ -94,12 +94,12 @@ TaskIsar _taskIsarDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = TaskIsar(
+    id: reader.readString(offsets[1]),
     importance:
         _TaskIsarimportanceValueEnumMap[reader.readByteOrNull(offsets[2])] ??
             Priority.basic,
   );
   object.deadline = reader.readDateTimeOrNull(offsets[0]);
-  object.id = reader.readString(offsets[1]);
   object.isCompleted = reader.readBoolOrNull(offsets[3]);
   object.title = reader.readStringOrNull(offsets[4]);
   return object;

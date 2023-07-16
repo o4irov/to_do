@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:to_do/data/local/persistence_manager.dart';
 
 import '../../../constants/constants.dart';
+import '../../../data/controllers/tasks_change_notifier_controller.dart';
 import '../../../domain/models/task.dart';
 import '../../../utils/localizations.dart';
 
 class Confirm extends StatelessWidget {
   final Task? task;
-  const Confirm({super.key, required this.task});
+  final TasksChangeNotifierController? tasksChangeNotifierController;
+  final void Function(BuildContext) pop;
+  const Confirm({
+    super.key,
+    required this.task,
+    required this.tasksChangeNotifierController,
+    required this.pop,
+  });
 
-  void removeTask(Task? task) async {
-    PersistenceManager persistenceManager = PersistenceManager();
-    await persistenceManager.removeTask(id: task!.id);
+  void removeTask(Task? task) {
+    tasksChangeNotifierController!.removeTask(task!);
   }
 
   @override
@@ -36,7 +42,7 @@ class Confirm extends StatelessWidget {
               children: [
                 TextButton(
                   onPressed: () {
-                    Navigator.pop(context);
+                    pop(context);
                   },
                   child: Text(
                     AppLocalizations.of(context)?.translate('no') ?? '',
@@ -48,8 +54,8 @@ class Confirm extends StatelessWidget {
                 TextButton(
                   onPressed: () {
                     removeTask(task);
-                    Navigator.pop(context);
-                    Navigator.pop(context);
+                    pop(context);
+                    pop(context);
                   },
                   child: Text(
                     AppLocalizations.of(context)?.translate('yes') ?? '',

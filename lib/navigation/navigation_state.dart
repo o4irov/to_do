@@ -1,33 +1,20 @@
+import 'package:to_do/data/controllers/tasks_change_notifier_controller.dart';
+
+import '../domain/models/task.dart';
+
 class NavigationState {
-  final bool? _unknown;
-  final bool? _isAdding;
+  final bool main;
+  final bool edit;
 
-  String? selectedTaskId;
+  final Task? task;
+  final TasksChangeNotifierController? tasksChangeNotifierController;
 
-  bool get isAdding => _isAdding == true;
-
-  bool get isChanging => selectedTaskId != null;
-
-  bool get isRoot => !isAdding && !isChanging && !isUnknown;
-
-  bool get isUnknown => _unknown == true;
-
-  NavigationState.root()
-      : _isAdding = false,
-        _unknown = false,
-        selectedTaskId = null;
-
-  NavigationState.adding()
-      : _isAdding = true,
-        _unknown = false,
-        selectedTaskId = null;
-
-  NavigationState.item(this.selectedTaskId)
-      : _isAdding = false,
-        _unknown = false;
-
-  NavigationState.unknown()
-      : _unknown = true,
-        _isAdding = false,
-        selectedTaskId = null;
+  const NavigationState.main()
+      : main = true,
+        edit = false,
+        task = null,
+        tasksChangeNotifierController = null;
+  const NavigationState.edit({this.tasksChangeNotifierController, this.task})
+      : edit = true,
+        main = false;
 }

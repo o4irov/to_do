@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../constants/constants.dart';
+import '../../../data/controllers/tasks_change_notifier_controller.dart';
 import '../../../domain/models/task.dart';
 import '../../../utils/localizations.dart';
 import 'confirm.dart';
@@ -8,7 +9,15 @@ import 'confirm.dart';
 class TaskDelete extends StatelessWidget {
   final bool isAdding;
   final Task? task;
-  const TaskDelete({super.key, required this.task, required this.isAdding});
+  final TasksChangeNotifierController? tasksChangeNotifierController;
+  final void Function(BuildContext) pop;
+  const TaskDelete({
+    super.key,
+    required this.task,
+    required this.isAdding,
+    required this.tasksChangeNotifierController,
+    required this.pop,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,6 +27,8 @@ class TaskDelete extends StatelessWidget {
         builder: (context) {
           return Confirm(
             task: task,
+            tasksChangeNotifierController: tasksChangeNotifierController,
+            pop: pop,
           );
         },
       );

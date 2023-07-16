@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:to_do/constants/constants.dart';
+import 'package:to_do/data/controllers/tasks_change_notifier_controller.dart';
 import 'package:to_do/utils/localizations.dart';
 import 'package:uuid/uuid.dart';
 import '../../domain/models/task.dart';
@@ -10,7 +11,14 @@ import 'widgets/task_title.dart';
 
 class AddTask extends StatefulWidget {
   final Task? task;
-  const AddTask({super.key, this.task});
+  final TasksChangeNotifierController tasksChangeNotifierController;
+  final void Function(BuildContext) pop;
+  const AddTask({
+    super.key,
+    this.task,
+    required this.tasksChangeNotifierController,
+    required this.pop,
+  });
 
   @override
   State<AddTask> createState() => _AddTaskState();
@@ -103,7 +111,7 @@ class _AddTaskState extends State<AddTask> {
               size: 30,
               color: AppConstants.primary(context),
             ),
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => widget.pop(context),
           ),
           actions: [
             TextButton(
@@ -115,7 +123,12 @@ class _AddTaskState extends State<AddTask> {
                   deadline: _deadlineExist ? _selectedDate : null,
                   isCompleted: widget.task?.isCompleted ?? false,
                 );
-                Navigator.pop(context, task);
+                if (_isAdding) {
+                  widget.tasksChangeNotifierController.addTask(task);
+                } else {
+                  widget.tasksChangeNotifierController.changeTask(task);
+                }
+                widget.pop(context);
               },
               child: Text(
                 AppLocalizations.of(context)?.translate('save') ?? '',
@@ -161,6 +174,9 @@ class _AddTaskState extends State<AddTask> {
               TaskDelete(
                 task: widget.task,
                 isAdding: _isAdding,
+                tasksChangeNotifierController:
+                    widget.tasksChangeNotifierController,
+                pop: widget.pop,
               ),
             ],
           ),
