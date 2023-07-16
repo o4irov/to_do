@@ -1,0 +1,97 @@
+name: Aanlyze -> Test -> Build -> Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - '*'
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+
+  analyze:
+    timeout-minutes: 10
+    name: 'Analyze before build and deploy'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Flutter Setup
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+        
+      - run: echo "BASE_URL=${{ secrets.URL }}" >> $GITHUB_ENV
+      - run: echo "AUTH_TOKEN=${{ secrets.TOKEN }}" >> $GITHUB_ENV
+      - run: flutter clean
+      - run: flutter pub get
+      - run: dart format
+      - run: dart pub run build_runner build --delete-conflicting-outputs
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+
+
+  test:
+    timeout-minutes: 10
+    name: 'Test before build and deploy'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup java-version
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '12.x'
+          cache: gradle
+
+      - name: Flutter Setup
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - run: echo "BASE_URL=${{ secrets.URL }}" >> $GITHUB_ENV
+      - run: echo "AUTH_TOKEN=${{ secrets.TOKEN }}" >> $GITHUB_ENV
+      - run: flutter pub get
+      - run: dart pub run build_runner build --delete-conflicting-outputs  
+      - name: Test
+        run: flutter run tests/integration/add_task.dart
+
+  build:
+    timeout-minutes: 15
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    needs: 
+      - analyze
+      - test
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '12.x'
+          cache: gradle
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - run: echo "BASE_URL=${{ secrets.URL }}" >> $GITHUB_ENV
+      - run: echo "AUTH_TOKEN=${{ secrets.TOKEN }}" >> $GITHUB_ENV
+      - run: flutter pub get
+      - run: dart pub run build_runner build --delete-conflicting-outputs
+
+      - name: Build APK
+        run: flutter build apk --release lib/main_prod.dart --dart-define="url=${{ secrets.URL }}" --dart-define="token=${{ secrets.TOKEN }}"
+
+      - name: Deploy APK
+        uses: actions/upload-artifact@v3 
+        with:
+          name: app
+          path: build/app/outputs/flutter-apk/
