@@ -11,6 +11,9 @@
 ## 📱 Скриншоты
 
 ![Main screen](git/first.png) ![Add task](git/second.png)
+![Main screen Tablet](git/ladnscape_tablet_main.png)
+![Add task Tablet](git/ladnscape_tablet_add.png)
+
 
 ## ♻️ Features
 - Режим добавления/редактирования задачи
