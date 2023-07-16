@@ -5,7 +5,8 @@ class ConfigRepository {
 
   ConfigRepository(this._remoteConfig);
 
-  bool get useDefaultColor => _remoteConfig.getBool(_ConfigFields.useDefaultColor);
+  bool get useDefaultColor =>
+      _remoteConfig.getBool(_ConfigFields.useDefaultColor);
 
   Future<void> init() async {
     _remoteConfig.setDefaults({

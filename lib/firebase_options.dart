@@ -70,7 +70,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1052004457191',
     projectId: 'yandex-todo-eb9e0',
     storageBucket: 'yandex-todo-eb9e0.appspot.com',
-    iosClientId: '1052004457191-79kpstmv9220ot6b23oac2vhhtpb8m56.apps.googleusercontent.com',
+    iosClientId:
+        '1052004457191-79kpstmv9220ot6b23oac2vhhtpb8m56.apps.googleusercontent.com',
     iosBundleId: 'com.example.shmrTodo',
   );
 }

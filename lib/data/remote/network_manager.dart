@@ -5,11 +5,8 @@ import 'package:to_do/domain/models/task.dart';
 import 'package:to_do/utils/logger.dart';
 
 class NetworkManager {
-  // static const _baseUrl = String.fromEnvironment('url');
-  // static const _token = String.fromEnvironment('token');
-
-  static const _baseUrl = 'https://beta.mrdekk.ru/todobackend';
-  static const _token = 'contestability';
+  static const _baseUrl = String.fromEnvironment('url');
+  static const _token = String.fromEnvironment('token');
 
   Map<String, String> getHeaders(int revision) {
     return {
