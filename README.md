@@ -11,7 +11,7 @@
 ## 📱 Скриншоты
 
 ![Main screen](git/first.png) ![Add task](git/second.png)
-![Main screen Tablet](git/ladnscape_tablet_main.png)
+![Main screen Tablet](git/landscape_tablet_main.png)
 ![Add task Tablet](git/ladnscape_tablet_add.png)
 
 
