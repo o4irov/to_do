@@ -1,11 +1,11 @@
 import '../../utils/device_id.dart';
 
 class Task {
-  String id;
-  String title;
-  bool isCompleted;
-  Priority importance;
-  DateTime? deadline;
+  final String id;
+  final String title;
+  final bool isCompleted;
+  final Priority importance;
+  final DateTime? deadline;
 
   Task({
     required this.id,
