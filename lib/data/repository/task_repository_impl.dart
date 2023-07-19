@@ -1,20 +1,25 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:to_do/data/local/persistence_manager.dart';
 import 'package:to_do/data/remote/network_manager.dart';
+import 'package:to_do/data/repository/connectivity_checker.dart';
 import 'package:to_do/domain/models/task.dart';
 import 'package:to_do/domain/repository/task_repository.dart';
 
 import '../../utils/logger.dart';
 
 class TaskRepositoryImpl extends TaskRepository {
+  final ConnectivityChecker connectivityChecker;
   final PersistenceManager persistenceManager;
   final NetworkManager networkManager;
 
-  TaskRepositoryImpl(this.persistenceManager, this.networkManager);
+  TaskRepositoryImpl(
+    this.persistenceManager,
+    this.networkManager,
+    this.connectivityChecker,
+  );
 
   @override
   Future<List<Task>> getTasks() async {
-    final hasNetwork = await networkChecker();
+    final hasNetwork = await connectivityChecker.networkChecker();
     try {
       if (hasNetwork) {
         final data = await networkManager.getTasks();
@@ -54,7 +59,7 @@ class TaskRepositoryImpl extends TaskRepository {
 
   @override
   Future<void> addTask(Task task) async {
-    final hasNetwork = await networkChecker();
+    final hasNetwork = await connectivityChecker.networkChecker();
     try {
       await persistenceManager.addTask(task: task);
       logger.i(
@@ -74,7 +79,7 @@ class TaskRepositoryImpl extends TaskRepository {
 
   @override
   Future<void> removeTask(String id) async {
-    final hasNetwork = await networkChecker();
+    final hasNetwork = await connectivityChecker.networkChecker();
     try {
       await persistenceManager.removeTask(id: id);
       logger.i(
@@ -97,7 +102,7 @@ class TaskRepositoryImpl extends TaskRepository {
 
   @override
   Future<void> changeTask(Task task) async {
-    final hasNetwork = await networkChecker();
+    final hasNetwork = await connectivityChecker.networkChecker();
     try {
       await persistenceManager.changeTask(task: task);
       logger.i(
@@ -117,12 +122,5 @@ class TaskRepositoryImpl extends TaskRepository {
     } on Exception catch (e) {
       logger.e('TaskRepositoryImpl: changeTask(): ${e.toString()}');
     }
-  }
-
-  Future<bool> networkChecker() async {
-    final connectivityResult = await (Connectivity().checkConnectivity());
-    logger.i('networkCheker: Connection: $connectivityResult');
-    return connectivityResult == ConnectivityResult.mobile ||
-        connectivityResult == ConnectivityResult.wifi;
   }
 }

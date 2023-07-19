@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:to_do/data/local/persistence_manager.dart';
+import 'package:to_do/data/local/persistence_manager_impl.dart';
 
+import '../data/local/persistence_manager.dart';
 import '../domain/models/routes.dart';
 import 'navigation_state.dart';
 
@@ -10,7 +11,7 @@ class MyRouteInformationParser extends RouteInformationParser<NavigationState> {
   Future<NavigationState> parseRouteInformation(
       RouteInformation routeInformation) async {
     final location = routeInformation.location;
-    PersistenceManager persistenceManager = PersistenceManager();
+    PersistenceManager persistenceManager = PersistenceManagerImpl();
     final uri = Uri.parse(location ?? 'myapp://example.com/');
 
     if (uri.pathSegments.isEmpty) {

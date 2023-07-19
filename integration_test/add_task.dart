@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:intl/intl.dart';
 import 'package:to_do/domain/models/task.dart';
-import 'package:to_do/main_debug.dart' as app;
+import 'package:to_do/main.dart' as app;
 import 'package:to_do/presentation/common/task.dart';
 import 'package:to_do/presentation/home_screen/home_screen.dart';
 import 'package:to_do/presentation/home_screen/todo_list.dart';

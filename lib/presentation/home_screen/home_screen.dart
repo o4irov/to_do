@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:to_do/data/controllers/tasks_change_notifier_controller.dart';
-import 'package:to_do/data/local/persistence_manager.dart';
+import 'package:to_do/data/local/persistence_manager_impl.dart';
+import 'package:to_do/data/repository/connectivity_checker.dart';
 import 'package:to_do/data/repository/task_repository_impl.dart';
 import 'package:to_do/presentation/home_screen/todo_list.dart';
 
 import '../../constants/constants.dart';
-import '../../data/remote/network_manager.dart';
+import '../../data/remote/network_manager_impl.dart';
 import '../../domain/models/task.dart';
 import '../../utils/localizations.dart';
 
@@ -30,8 +31,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     tasksChangeNotifierController = TasksChangeNotifierController(
       taskRepository: TaskRepositoryImpl(
-        PersistenceManager(),
-        NetworkManager(),
+        PersistenceManagerImpl(),
+        NetworkManagerImpl(),
+        ConnectivityCheckerImpl(),
       ),
     );
     tasksChangeNotifierController.getTasks();
